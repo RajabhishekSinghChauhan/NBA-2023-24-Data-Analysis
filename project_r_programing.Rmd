@@ -1,0 +1,165 @@
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# Load the dataset
+file_path <- "C:/Users/manoh/Downloads/Compressed/archive_2/final_data.csv"
+data <- read_csv(file_path)
+print(data)
+summary(data)
+```
+
+Question 1: What is the Distribution of Points Scored by Players?
+To visualize the distribution of points scored by players, we can use a histogram.
+```{r}
+library(ggplot2)
+
+# Plot histogram of points scored
+ggplot(data, aes(x = PTS)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Points Scored by Players", x = "Points Scored", y = "Frequency") +
+  theme_minimal()
+
+```
+
+Question 2: How Do Field Goals Made (FGM) and Three-Point Field Goals Made (FG3M) Relate to Each Other?
+To visualize the relationship between field goals made and three-point field goals made, we can use a scatter plot.
+```{r}
+# Plot scatter plot of FGM vs. FG3M
+ggplot(data, aes(x = FGM, y = FG3M)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  labs(title = "Relationship Between Field Goals Made and Three-Point Field Goals Made", x = "Field Goals Made (FGM)", y = "Three-Point Field Goals Made (FG3M)") +
+  theme_minimal()
+
+```
+Question 3: What Are the Average Field Goals Made (FGM), Blocks (BLK_y), and Rebounds (REB) by Team?
+To visualize the average field goals made, blocks, and rebounds by team, we can use a bar plot.
+```{r}
+# Calculate the average FGM, BLK_y, and REB by team
+team_averages <- data %>%
+  group_by(TEAM_NAME_y) %>%
+  summarise(
+    Avg_FGM = mean(FGM, na.rm = TRUE),
+    Avg_BLK_y = mean(BLK_y, na.rm = TRUE),
+    Avg_REB = mean(REB, na.rm = TRUE)
+  ) %>%
+  gather(key = "Statistic", value = "Average", -TEAM_NAME_y)
+
+# Plot bar plot of average FGM, BLK_y, and REB by team
+ggplot(team_averages, aes(x = TEAM_NAME_y, y = Average, fill = Statistic)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average Field Goals Made, Blocks, and Rebounds by Team", x = "Team", y = "Average Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Question 4: What is the Distribution of Player Efficiency Ratings?
+To visualize the distribution of player efficiency ratings, we can use a histogram.
+```{r}
+# Plot histogram of player efficiency ratings
+ggplot(data, aes(x = Efficiency)) +
+  geom_histogram(binwidth = 5, fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Player Efficiency Ratings", x = "Efficiency Rating", y = "Frequency") +
+  theme_minimal()
+
+```
+
+Question 5: How Does the Number of Wins Compare Between Home and Away Games?
+To compare the number of wins between home and away games, we can use a grouped bar plot.
+```{r}
+# Summarize the number of wins by location
+wins_by_location <- data %>%
+  group_by(LOCATION) %>%
+  summarise(Total_Wins = sum(W_x, na.rm = TRUE))
+
+# Plot grouped bar plot of wins by location
+ggplot(wins_by_location, aes(x = LOCATION, y = Total_Wins, fill = LOCATION)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Comparison of Wins in Home and Away Games", x = "Location", y = "Total Wins") +
+  theme_minimal()
+
+```
+Question 6: What is the Average Plus/Minus Statistic by Player Position?
+To visualize the average plus/minus statistic by player position, we can use a box plot.
+```{r}
+# Calculate the average plus/minus statistic by player position
+plus_minus_by_position <- data %>%
+  group_by(POSITION) %>%
+  summarise(Average_Plus_Minus = mean(PLUS_MINUS, na.rm = TRUE))
+
+# Plot box plot of average plus/minus by player position
+ggplot(data, aes(x = POSITION, y = PLUS_MINUS)) +
+  geom_boxplot(fill = "orange", color = "black") +
+  labs(title = "Average Plus/Minus Statistic by Player Position", x = "Player Position", y = "Plus/Minus") +
+  theme_minimal()
+
+```
+
+Question 7: How Do Free Throws Made (FTM) Vary Across Teams?
+To visualize the variation of free throws made across different teams, we can use a violin plot
+```{r}
+# Plot violin plot of free throws made across teams
+ggplot(data, aes(x = TEAM_NAME_y, y = FTM)) +
+  geom_violin(fill = "purple", alpha = 0.7) +
+  labs(title = "Variation of Free Throws Made Across Teams", x = "Team", y = "Free Throws Made") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Question 8: What is the Correlation Matrix of Key Statistics?
+To visualize the correlation matrix of key statistics (e.g., FGM, FG3M, REB, AST, PTS), we can use a correlation heatmap.
+```{r}
+library(tidyr)
+library(ggplot2)
+library(tibble)
+
+# Select key statistics
+key_stats <- data %>%
+  select(FGM, FG3M, REB, AST, PTS)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(key_stats, use = "complete.obs")
+
+# Convert correlation matrix to a tidy format
+melted_correlation_matrix <- as.data.frame(correlation_matrix) %>%
+  rownames_to_column(var = "Var1") %>%
+  pivot_longer(cols = -Var1, names_to = "Var2", values_to = "value")
+
+# Plot heatmap of correlation matrix
+ggplot(data = melted_correlation_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Correlation Matrix of Key Statistics", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                   size = 12, hjust = 1))
+
+```
+Question 9: What is the Relationship Between Turnovers (TOV) and Steals (STL_x)?
+To visualize the relationship between turnovers and steals, we can use a bubble plot where the size of the points represents the number of games played (GP_x).
+```{r}
+# Plot bubble plot of turnovers vs. steals
+ggplot(data, aes(x = TOV, y = STL_x, size = GP_x, color = TEAM_NAME_y)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Relationship Between Turnovers and Steals", x = "Turnovers", y = "Steals", size = "Games Played") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+
+Explanation of Graphs:
+Histogram of Points Scored: This graph helps visualize the frequency distribution of points scored by players, showing how many players fall into various point ranges.
+
+Scatter Plot of FGM vs. FG3M: This graph illustrates the relationship between the number of field goals made and the number of three-point field goals made, helping to identify any correlations.
+
+Bar Plot of Average FGM, BLK_y, and REB by Team: This graph shows the average field goals made, blocks, and rebounds for each team, allowing for comparison across teams.
+
+These visualizations will help in understanding the data better and drawing meaningful insights. Let me know if you need further adjustments or additional questions!
